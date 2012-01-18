@@ -18,7 +18,8 @@ list_objects() {
     curl -X GET  -H "$TOKEN" $SURL/$1
 }
 
-delete_objects() {
+#Delete all objects inside a container and then delete the container
+container_kill() {
     curl -X GET  -H "$TOKEN" $SURL/$1 > /tmp/cf_objects
     while read line; do
         curl -X DELETE  -H "$TOKEN" $SURL/$1/$line #Delete Objects
@@ -27,8 +28,12 @@ delete_objects() {
     rm /tmp/cf_objects
 }
 
+create_container() {
+    curl -X PUT  -H "$TOKEN" $SURL/$1
+}
+
 #Command Line Parser
-while getopts "c:k:u:123:4:" opt; do
+while getopts "c:k:u:123:X:4:" opt; do
   case $opt in
     c) case $OPTARG in
          uk|UK) URL="https://lon.auth.api.rackspacecloud.com/v1.0";;
@@ -46,8 +51,12 @@ while getopts "c:k:u:123:4:" opt; do
     3) auth_test $KEY $USER $URL #List Objects Container
        CONTAINER=$OPTARG
        list_objects $CONTAINER;;
-    4) auth_test $KEY $USER $URL #Delete Objects and container
+    X) auth_test $KEY $USER $URL #Delete Objects and container
        CONTAINER=$OPTARG
-       delete_objects $CONTAINER;;
+       container_kill $CONTAINER;;
+    4) auth_test $KEY $USER $URL #Create Container
+       CONTAINER=$OPTARG
+       create_container $CONTAINER;;
+       
   esac
 done
