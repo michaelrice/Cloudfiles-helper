@@ -15,7 +15,21 @@ list_containers() {
 
 #List Objects in a specified container
 list_objects() {
-    curl -X GET  -H "$TOKEN" $SURL/$1
+    
+    LIST=0
+    curl -X GET  -H "$TOKEN" $SURL/$1 > /tmp/cf_objects$LIST
+    LINES=$(wc -l /tmp/cf_objects$LIST | awk '{print $1}')
+    
+    while [ $LINES -eq 10000 ]
+    do
+        curl -X GET  -H "$TOKEN" $SURL/$1?marker=$MARKER > /tmp/cf_objects$LIST
+        MARKER=$(tail -n 1 /tmp/cf_objects$LIST)
+        LINES=$(wc -l /tmp/cf_objects$LIST | awk '{print $1}')
+        LIST=$[$LIST+1]
+    done   
+    cat /tmp/cf_objects* > ./Object_list.txt
+    rm /tmp/cf_objects*
+    echo "A list of objects has been saved in the current directory."
 }
 
 #Delete all objects inside a container and then delete the container
