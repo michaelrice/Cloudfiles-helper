@@ -1,16 +1,23 @@
 #!/bin/bash
 
-#Authorization test
-auth_test() {
-    curl -D - -H "X-Auth-Key: $1" -H "X-Auth-User: $2" $3 &>/tmp/cf_test.tmp
-    TOKEN=$(grep -E '(X-Auth-Token:)' /tmp/cf_test.tmp)
-    SURL=$(grep -E '(X-Storage-Url:)' /tmp/cf_test.tmp | awk '{print $2}' | sed -e 's///g')
-    rm /tmp/cf_test.tmp
+function strip() { echo $1 | tr -d "\r"; }
+
+#Authorization
+get_auth_token() {
+    # From Jordan Callicoat
+    # this works everywhere
+    oIFS=$IFS
+    IFS=`echo -e '\n'`
+    headers=`curl -s -i -H "X-Auth-User: ${username}" -H "X-Auth-Key: ${api_key}" ${url}`
+    surl=$(strip `echo ${headers} | awk '/X-Storage-Url:/ {print $2}'`)
+    token=$(strip `echo ${headers} | awk '/X-Auth-Token:/ {print $2}'`)
+    status=$(strip `echo ${headers} | awk '/HTTP\/1\.1/ {print $2}'`)
+    IFS=$oIFS
 }
 
 #List containers
 list_containers() {
-    curl -X GET  -H "$TOKEN" $SURL
+    curl -X GET  -H "${token}" ${surl}
 }
 
 #List Objects in a specified container
