@@ -1,16 +1,23 @@
 #!/bin/bash
 
-#Authorization test
-auth_test() {
-    curl -D - -H "X-Auth-Key: $1" -H "X-Auth-User: $2" $3 &>/tmp/cf_test.tmp
-    TOKEN=$(grep -E '(X-Auth-Token:)' /tmp/cf_test.tmp)
-    SURL=$(grep -E '(X-Storage-Url:)' /tmp/cf_test.tmp | awk '{print $2}' | sed -e 's///g')
-    rm /tmp/cf_test.tmp
+function strip() { echo $1 | tr -d "\r"; }
+
+#Authorization
+get_auth_token() {
+    # From Jordan Callicoat
+    # this works everywhere
+    oIFS=$IFS
+    IFS=`echo -e '\n'`
+    headers=`curl -s -i -H "X-Auth-User: $USER" -H "X-Auth-Key: $KEY" $URL`
+    surl=$(strip `echo ${headers} | awk '/X-Storage-Url:/ {print $2}'`)
+    token=$(strip `echo ${headers} | awk '/X-Auth-Token:/ {print $2}'`)
+    status=$(strip `echo ${headers} | awk '/HTTP\/1\.1/ {print $2}'`)
+    IFS=$oIFS
 }
 
 #List containers
 list_containers() {
-    curl -X GET  -H "$TOKEN" $SURL
+    curl -X GET  -H "X-Auth-Token: $token" $surl
 }
 
 #List Objects in a specified container
@@ -34,12 +41,18 @@ list_objects() {
 
 #Delete all objects inside a container and then delete the container
 container_kill() {
-    curl -X GET  -H "$TOKEN" $SURL/$1 > /tmp/cf_objects
-    while read line; do
-    curl -X DELETE  -H "$TOKEN" $SURL/$1/$line #Delete Objects
-    done < /tmp/cf_objects
-    curl -X DELETE  -H "$TOKEN" $SURL/$1 #Delete Container
-    rm /tmp/cf_objects
+    while [ `curl -X GET -H "X-Auth-Token: $token" $surl/$1 | wc -l` -gt 0 ]; do
+        curl -X GET -H "X-Auth-Token: $token" $surl/$1 > deletethese.lst
+        while read LINE; do
+            LINE=`echo "$LINE" | sed 's/ /%20/g'`
+            LINE=`echo "$LINE" | sed 's/,/%2C/g'`
+            curl -X DELETE -H "X-Auth-Token: $token" $surl/$1/$LINE &
+            echo $!
+            echo $LINE
+        done < deletethese.lst
+    done
+curl -X DELETE -H "X-Auth-Token: $token" $surl/$1
+rm deletethese.lst
 }
 
 create_container() {
@@ -62,24 +75,24 @@ while getopts "c:k:u:123:X:4:h" opt; do
             uk|UK) URL="https://lon.auth.api.rackspacecloud.com/v1.0";;
             us|US) URL="https://auth.api.rackspacecloud.com/v1.0";;
                 *) echo "$OPTARG is an invalid argument"
-                    exit 1;;
-                    esac;;
-        h) usage
-           ;;
+                exit 1;;
+                esac;;
+        h) usage;;
         k) KEY=$OPTARG;;
         u) USER=$OPTARG;;
-        1) auth_test $KEY $USER $URL #Auth Test
-            echo $TOKEN
-            echo $SURL;;
-        2) auth_test $KEY $USER $URL #List Containers
+        1)  get_auth_token $KEY $USER $URL #Auth Test
+            echo $surl
+            echo $token
+            echo $status;;
+        2)  get_auth_token $KEY $USER $URL #List Containers
             list_containers;;
-        3) auth_test $KEY $USER $URL #List Objects Container
+        3)  get_auth_token $KEY $USER $URL #List Objects Container
             CONTAINER=$OPTARG
             list_objects $CONTAINER;;
-        X) auth_test $KEY $USER $URL #Delete Objects and container
+        X)  get_auth_token $KEY $USER $URL #Delete Objects and container
             CONTAINER=$OPTARG
             container_kill $CONTAINER;;
-        4) auth_test $KEY $USER $URL #Create Container
+        4)  get_auth_token $KEY $USER $URL #Create Container
             CONTAINER=$OPTARG
             create_container $CONTAINER;;
     esac
