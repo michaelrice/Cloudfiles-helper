@@ -1,3 +1,9 @@
-This is a tool that will help with basic cloudfiles troubleshooting tasks. It will also take care of some tasks which arent possible through the control panel.
+Usage: ./cf_tool.sh [-c US or UK] [-u username] [-k apikey] [-1234X]
 
-Its ugly, not efficient, but it works. I will work to add features and optimize it in the future.
+Examples:
+
+Authorization test:
+    ./cf_tools.sh -c US -u username -k api_key -0
+
+Delete container:
+    ./cf_tools.sh -c US -u username -k api_key -X container_name
