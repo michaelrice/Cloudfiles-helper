@@ -65,10 +65,13 @@ Usage: ./cf_tool.sh [-c US or UK] [-u username] [-k apikey] [-1234X]
 Examples:
 
 Authorization test:
-    ./cf_tools.sh -c US -u username -k api_key -0
+    ./cf_tool.sh -c US -u username -k api_key -0
+    
+List containers:
+    ./cf_tool.sh -c US -u username -k api_key -1
 
 Delete container:
-    ./cf_tools.sh -c US -u username -k api_key -X container_name
+    ./cf_tool.sh -c US -u username -k api_key -X container_name
 EOF
     exit
 }
