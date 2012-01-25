@@ -48,9 +48,15 @@ create_container() {
 
 usage() {
     cat << EOF 
-How on earth do I use this?
-Please fill me in with usage :)
-./`basename $0` --wtf
+Usage: ./cf_tool.sh [-c US or UK] [-u username] [-k apikey] [-1234X]
+
+Examples:
+
+Authorization test:
+    ./cf_tools.sh -c US -u username -k api_key -0
+
+Delete container:
+    ./cf_tools.sh -c US -u username -k api_key -X container_name
 EOF
     exit
 }
