@@ -61,9 +61,15 @@ create_container() {
 
 usage() {
     cat << EOF 
-How on earth do I use this?
-Please fill me in with usage :)
-./`basename $0` --wtf
+Usage: ./cf_tool.sh [-c US or UK] [-u username] [-k apikey] [-1234X]
+
+Examples:
+
+Authorization test:
+    ./cf_tools.sh -c US -u username -k api_key -0
+
+Delete container:
+    ./cf_tools.sh -c US -u username -k api_key -X container_name
 EOF
     exit
 }
@@ -81,9 +87,13 @@ while getopts "c:k:u:123:X:4:h" opt; do
         k) KEY=$OPTARG;;
         u) USER=$OPTARG;;
         1)  get_auth_token $KEY $USER $URL #Auth Test
-            echo $surl
-            echo $token
-            echo $status;;
+            echo -e "Storage URL:\n$surl\n"
+            echo -e "Authorization token:\n$token\n"
+            if [ $status -eq "204" ]; then
+                    echo "Your request was successful! Status code $status"
+                else
+                    echo "There was a problem! Status code $status"
+            fi;;
         2)  get_auth_token $KEY $USER $URL #List Containers
             list_containers;;
         3)  get_auth_token $KEY $USER $URL #List Objects Container

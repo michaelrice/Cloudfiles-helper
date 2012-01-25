@@ -1,2 +1,3 @@
--Need to add usage documentation
--Not all functions are working in the development branch
+-Need to add more documentation
+-Add more functionality
+-Only the Authorization test (-1) and container delete (-X) are working.
