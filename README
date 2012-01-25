@@ -1,4 +1,4 @@
-age: ./cf_tool.sh [-c US or UK] [-u username] [-k apikey] [-1234X]
+Usage: ./cf_tool.sh [-c US or UK] [-u username] [-k apikey] [-1234X]
 
 Examples:
 
