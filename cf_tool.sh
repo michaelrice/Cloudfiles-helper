@@ -47,7 +47,6 @@ container_kill() {
             LINE=`echo "$LINE" | sed 's/ /%20/g'`
             LINE=`echo "$LINE" | sed 's/,/%2C/g'`
             curl -X DELETE -H "X-Auth-Token: $token" $surl/$1/$LINE &
-            echo $!
             echo $LINE
         done < deletethese.lst
     done
