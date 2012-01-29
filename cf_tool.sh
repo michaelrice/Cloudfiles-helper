@@ -59,19 +59,19 @@ create_container() {
 }
 
 usage() {
-    cat << EOF 
-Usage: ./cf_tool.sh [-c US or UK] [-u username] [-k apikey] [-1234X]
+    cat << EOF
+Usage: ./`basename $0` [-c US or UK] [-u username] [-k apikey] [-1234X]
 
 Examples:
 
 Authorization test:
-    ./cf_tool.sh -c US -u username -k api_key -0
-    
+    ./`basename $0` -c US -u username -k api_key -0
+
 List containers:
-    ./cf_tool.sh -c US -u username -k api_key -1
+    ./`basename $0` -c US -u username -k api_key -1
 
 Delete container:
-    ./cf_tool.sh -c US -u username -k api_key -X container_name
+    ./`basename $0` -c US -u username -k api_key -X container_name
 EOF
     exit
 }
